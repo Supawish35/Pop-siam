@@ -1,0 +1,132 @@
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Courier New", sans-serif;
+            background-image: url("photos/siam.jpg");
+            background-size: cover;
+            /* ขยายเต็มหน้าจอ */
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        .container {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        h1 {
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .click-counter {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 1rem 0;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .image-container {
+            position: relative;
+            margin: 2rem 5rem;
+            width: 300px;
+            height: 300px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 0.5s ease;
+        }
+
+        .dynamic-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .status {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: bold;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .status.connected {
+            background: rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+        }
+
+        .status.disconnected {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+        }
+
+        .instructions {
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            opacity: 0.8;
+            animation: pulse 2s infinite;
+        }
+
+        .total-counter {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 16px;
+            z-index: 1000;
+        }
+
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.8;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .click-effect {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 3px solid #ffd700;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: clickRipple 0.6s ease-out;
+        }
+
+        @keyframes clickRipple {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0;
+            }
+        }
