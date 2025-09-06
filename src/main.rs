@@ -157,13 +157,22 @@ async fn main() -> Result<(), IoError> {
     let state = Arc::new(Mutex::new(AppState::new()));
     let peer_map = PeerMap::new(Mutex::new(HashMap::new()));
 
-    while let Ok((stream, addr)) = listener.accept().await {
-        tokio::spawn(handle_connection(
-            peer_map.clone(),
-            stream,
-            addr,
-            state.clone(),
-        ));
+    println!("Press Ctrl+C to shutdown the programs.");
+    loop {
+        tokio::select! {
+            Ok((stream, addr)) = listener.accept() => {
+                tokio::spawn(handle_connection(
+                    peer_map.clone(),
+                    stream,
+                    addr,
+                    state.clone(),
+                ));
+            }
+            _ = tokio::signal::ctrl_c() => {
+                println!("Ctrl+C received, shutting down.");
+                break;
+            }
+        }
     }
 
     Ok(())
