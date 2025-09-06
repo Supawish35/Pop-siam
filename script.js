@@ -68,7 +68,7 @@ class WebSocketClickCounter {
   }
 
   handleServerMessage(data) {
-    console.log('Received from server:', data);
+    console.log('Received from server: ', data);
 
     switch (data.type) {
       case 'init':
@@ -225,3 +225,7 @@ class WebSocketClickCounter {
 document.addEventListener('DOMContentLoaded', () => {
   new WebSocketClickCounter();
 });
+
+function main() {
+  var name
+}
