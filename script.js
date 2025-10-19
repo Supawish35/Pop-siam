@@ -225,7 +225,3 @@ class WebSocketClickCounter {
 document.addEventListener('DOMContentLoaded', () => {
   new WebSocketClickCounter();
 });
-
-function main() {
-  var name
-}
