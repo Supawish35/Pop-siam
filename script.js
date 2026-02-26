@@ -102,7 +102,6 @@ class WebSocketClickCounter {
         break;
 
       case 'click_response':
-        this.clickCount = data.client_clicks;
         this.updateClickCounter();
         if (data.total_clicks !== undefined) {
           this.updateTotalCounter(data.total_clicks);
@@ -156,6 +155,7 @@ class WebSocketClickCounter {
     }
     this.audio.play();
     this.createClickEffect(event);
+    this.clickCount += 1;
     this.sendClickData(event);
   }
 
@@ -206,17 +206,8 @@ class WebSocketClickCounter {
   sendClickData(event) {
     const data = {
       type: 'click',
-      timestamp: new Date().toISOString(),
-      position: { x: event.clientX, y: event.clientY },
     };
-
     this.sendToServer(data);
-
-    // Flash status to show activity
-    this.statusEl.style.backgroundColor = 'rgba(0, 255, 0, 0.4)';
-    setTimeout(() => {
-      this.statusEl.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
-    }, 200);
   }
 
   updateStatus(status) {

@@ -68,16 +68,12 @@ async def websocket_handler(request: web.Request):
                 if mtype == "click":
                     async with state.lock:
                         state.total_clicks += 1
-                        state.client_clicks[addr] = state.client_clicks.get(addr, 0) + 1
-                        client_clicks = state.client_clicks[addr]
                         total = state.total_clicks
 
                     # reply to sender
                     await ws.send_json({
                         "type": "click_response",
-                        "client_clicks": client_clicks,
                         "total_clicks": total,
-                        "timestamp": datetime.utcnow().isoformat() + "Z",
                     })
 
                     # broadcast to others
