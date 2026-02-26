@@ -1,4 +1,4 @@
 /target/
 /total.txt
 /target/debug/
-.env
+/.env

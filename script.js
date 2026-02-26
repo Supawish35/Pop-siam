@@ -1,4 +1,4 @@
-const IP = 'localhost'; // Change to your server IP if needed
+const IP = '74.220.48.0'; // Change to your server IP if needed
 const PORT = '8765'; // WebSocket server port 
 
 const GOAL = 1500; // Click goal to change the image
