@@ -37,9 +37,7 @@ class WebSocketClickCounter {
   }
 
   connectWebSocket() {
-    // Dynamically construct WebSocket URL based on current location
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    const wsUrl = this.getWebSocketUrl();
     this.socket = new WebSocket(wsUrl);
 
     this.socket.onopen = () => {
@@ -62,8 +60,33 @@ class WebSocketClickCounter {
 
     this.socket.onerror = (error) => {
       console.error('WebSocket error:', error);
-      this.updateStatus('Error');
+      this.updateStatus('Error - check backend');
     };
+  }
+
+  getWebSocketUrl() {
+    const pageProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const params = new URLSearchParams(window.location.search);
+
+    // Highest priority: explicit override from query string, e.g. ?ws=ws://localhost:8765/ws
+    const queryWs = params.get('ws');
+    if (queryWs) {
+      return queryWs;
+    }
+
+    // Optional global override for embedding scenarios.
+    if (window.WS_URL) {
+      return window.WS_URL;
+    }
+
+    // If page is served from IDE/static preview ports, use backend default.
+    const previewPorts = new Set(['63342', '5500', '5501', '3000', '5173']);
+    if (previewPorts.has(window.location.port)) {
+      return `${pageProtocol}//${window.location.hostname}:8765/ws`;
+    }
+
+    // Default to same-origin websocket path.
+    return `${pageProtocol}//${window.location.host}/ws`;
   }
 
   handleServerMessage(data) {
