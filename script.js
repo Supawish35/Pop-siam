@@ -1,240 +1,224 @@
 const GOAL = 1500; // Click goal to change the image
 
 class WebSocketClickCounter {
-  constructor() {
-    this.clickCount = 0;
-    this.socket = null;
-    this.isConnected = false;
-    this.reconnectAttempts = 0;
-    this.maxReconnectAttempts = 5;
-
-    this.initializeElements();
-    this.setupEventListeners();
-    this.connectWebSocket();
-  }
-
-  initializeElements() {
-    this.clickCounterEl = document.getElementById('clickCounter');
-    this.dynamicImageEl = document.getElementById('dynamicImage');
-    this.statusEl = document.getElementById('wsStatus');
-
-    this.audio = document.getElementById("myAudio");
-
-    this.originalImageSrc = 'photos/pop2.jpg';
-    this.clickedImageSrc = 'photos/pop1.jpg';
-    this.goalOriginalImageSrc = 'photos/pop4.png';
-    this.goalClickedImageSrc = 'photos/pop3.png';
-  }
-
-  setupEventListeners() {
-    document.body.addEventListener('mousedown', (e) => {
-      this.handleMouseDown(e);
-    });
-
-    document.body.addEventListener('mouseup', (e) => {
-      this.handleMouseUp(e);
-    });
-  }
-
-  connectWebSocket() {
-    const wsUrl = this.getWebSocketUrl();
-    this.socket = new WebSocket(wsUrl);
-
-    this.socket.onopen = () => {
-      this.isConnected = true;
-      this.updateStatus('Connected');
-      this.startHeartbeat();
-      console.log('Connected to WebSocket server');
-    };
-
-    this.socket.onmessage = (event) => {
-      this.handleServerMessage(JSON.parse(event.data));
-    };
-
-    this.socket.onclose = () => {
-      this.isConnected = false;
-      this.updateStatus('Disconnected');
-      console.log('Disconnected from WebSocket server');
-      this.attemptReconnect();
-    };
-
-    this.socket.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      this.updateStatus('Error - check backend');
-    };
-  }
-
-  getWebSocketUrl() {
-    const pageProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const params = new URLSearchParams(window.location.search);
-
-    // Highest priority: explicit override from query string, e.g. ?ws=ws://localhost:8765/ws
-    const queryWs = params.get('ws');
-    if (queryWs) {
-      return queryWs;
-    }
-
-    // Optional global override for embedding scenarios.
-    if (window.WS_URL) {
-      return window.WS_URL;
-    }
-
-    // If page is served from IDE/static preview ports, use backend default.
-    const previewPorts = new Set(['63342', '5500', '5501', '3000', '5173']);
-    if (previewPorts.has(window.location.port)) {
-      return `${pageProtocol}//${window.location.hostname}:8765/ws`;
-    }
-
-    // Default to same-origin websocket path.
-    return `${pageProtocol}//${window.location.host}/ws`;
-  }
-
-  handleServerMessage(data) {
-    console.log('Received from server: ', data);
-
-    switch (data.type) {
-      case 'init':
+    constructor() {
         this.clickCount = 0;
-        this.updateClickCounter();
-        if (data.total_clicks !== undefined) {
-          this.updateTotalCounter(data.total_clicks);
-        }
-        break;
+        this.socket = null;
+        this.isConnected = false;
+        this.reconnectAttempts = 0;
+        this.maxReconnectAttempts = 5;
 
-      case 'click_response':
-        this.updateClickCounter();
-        if (data.total_clicks !== undefined) {
-          this.updateTotalCounter(data.total_clicks);
-        }
-        break;
-
-      case 'global_update':
-        if (data.total_clicks !== undefined) {
-          this.updateTotalCounter(data.total_clicks);
-        }
-        break;
-
-      case 'pong':
-        console.log('Received pong from server');
-        break;
-
-      case 'error':
-        console.error('Server error:', data.message);
-        break;
-    }
-  }
-
-  startHeartbeat() {
-    setInterval(() => {
-      if (this.isConnected && this.socket.readyState === WebSocket.OPEN) {
-        this.sendToServer({ type: 'ping' });
-      }
-    }, 30000);
-  }
-
-  attemptReconnect() {
-    if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      this.reconnectAttempts++;
-      console.log(`Attempting to reconnect... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
-
-      setTimeout(() => {
+        this.initializeElements();
+        this.setupEventListeners();
         this.connectWebSocket();
-      }, 2000 * this.reconnectAttempts);
-    } else {
-      console.log('Max reconnection attempts reached');
-      this.updateStatus('Failed to connect');
     }
-  }
+
+    initializeElements() {
+        this.clickCounterEl = document.getElementById('clickCounter');
+        this.dynamicImageEl = document.getElementById('dynamicImage');
+        this.statusEl = document.getElementById('wsStatus');
+
+        this.audio = document.getElementById("myAudio");
+
+        this.originalImageSrc = 'photos/pop2.jpg';
+        this.clickedImageSrc = 'photos/pop1.jpg';
+        this.goalOriginalImageSrc = 'photos/pop4.png';
+        this.goalClickedImageSrc = 'photos/pop3.png';
+    }
+
+    setupEventListeners() {
+        document.body.addEventListener('mousedown', (e) => {
+            this.handleMouseDown(e);
+        });
+
+        document.body.addEventListener('mouseup', (e) => {
+            this.handleMouseUp(e);
+        });
+    }
+
+    connectWebSocket() {
+        const wsUrl = this.getWebSocketUrl();
+        this.socket = new WebSocket(wsUrl);
+
+        this.socket.onopen = () => {
+            this.isConnected = true;
+            this.updateStatus('Connected');
+            this.startHeartbeat();
+            console.log('Connected to WebSocket server');
+        };
+
+        this.socket.onmessage = (event) => {
+            this.handleServerMessage(JSON.parse(event.data));
+        };
+
+        this.socket.onclose = () => {
+            this.isConnected = false;
+            this.updateStatus('Disconnected');
+            console.log('Disconnected from WebSocket server');
+            this.attemptReconnect();
+        };
+
+        this.socket.onerror = (error) => {
+            console.error('WebSocket error:', error);
+            this.updateStatus('Error - check backend');
+        };
+    }
+
+    getWebSocketUrl() {
+        const pageProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const params = new URLSearchParams(window.location.search);
+
+        // Highest priority: explicit override from query string, e.g. ?ws=ws://localhost:8765/ws
+        const queryWs = params.get('ws');
+        if (queryWs) {
+            return queryWs;
+        }
+
+        // Optional global override for embedding scenarios.
+        if (window.WS_URL) {
+            return window.WS_URL;
+        }
+
+        // If page is served from IDE/static preview ports, use backend default.
+        const previewPorts = new Set(['63342', '5500', '5501', '3000', '5173']);
+        if (previewPorts.has(window.location.port)) {
+            return `${pageProtocol}//${window.location.hostname}:8765/ws`;
+        }
+
+        // Default to same-origin websocket path.
+        return `${pageProtocol}//${window.location.host}/ws`;
+    }
+
+    handleServerMessage(data) {
+        console.log('Received from server: ', data);
+
+        this.updateClickCounter();
+        if (data.total_clicks !== undefined) {
+            this.updateTotalCounter(data.total_clicks);
+        }
+
+        switch (data.type) {
+            case 'pong':
+                console.log('Received pong from server');
+                break;
+
+            case 'error':
+                console.error('Server error:', data.message);
+                break;
+        }
+    }
+
+    startHeartbeat() {
+        setInterval(() => {
+            if (this.isConnected && this.socket.readyState === WebSocket.OPEN) {
+                this.sendToServer({type: 'ping'});
+            }
+        }, 30000);
+    }
+
+    attemptReconnect() {
+        if (this.reconnectAttempts < this.maxReconnectAttempts) {
+            this.reconnectAttempts++;
+            console.log(`Attempting to reconnect... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+
+            setTimeout(() => {
+                this.connectWebSocket();
+            }, 2000 * this.reconnectAttempts);
+        } else {
+            console.log('Max reconnection attempts reached');
+            this.updateStatus('Failed to connect');
+        }
+    }
 
     //mouse down 
-  handleMouseDown(event) {
-    if (this.clickCount < GOAL) {
-        this.dynamicImageEl.src = this.clickedImageSrc;
-    } else {
-        this.dynamicImageEl.src = this.goalClickedImageSrc;
+    handleMouseDown(event) {
+        if (this.clickCount < GOAL) {
+            this.dynamicImageEl.src = this.clickedImageSrc;
+        } else {
+            this.dynamicImageEl.src = this.goalClickedImageSrc;
+        }
+        this.audio.play();
+        this.createClickEffect(event);
+        this.clickCount += 1;
+        this.sendClickData(event);
     }
-    this.audio.play();
-    this.createClickEffect(event);
-    this.clickCount += 1;
-    this.sendClickData(event);
-  }
 
     //mouse up
-  handleMouseUp(event) {
-    if (this.clickCount < GOAL) {
-        this.dynamicImageEl.src = this.originalImageSrc;
-    }else {
-        this.dynamicImageEl.src = this.goalOriginalImageSrc;
-  }
-  this.audio.pause();
-  this.audio.currentTime = 0; // Reset audio to start
-  }
+    handleMouseUp(event) {
+        if (this.clickCount < GOAL) {
+            this.dynamicImageEl.src = this.originalImageSrc;
+        } else {
+            this.dynamicImageEl.src = this.goalOriginalImageSrc;
+        }
+        this.audio.pause();
+        this.audio.currentTime = 0; // Reset audio to start
+    }
 
     // Create a click effect at the mouse position
-  createClickEffect(event) {
-    const effect = document.createElement('div');
-    effect.className = 'click-effect';
-    effect.style.left = `${event.clientX - 50}px`;
-    effect.style.top = `${event.clientY - 50}px`;
+    createClickEffect(event) {
+        const effect = document.createElement('div');
+        effect.className = 'click-effect';
+        effect.style.left = `${event.clientX - 50}px`;
+        effect.style.top = `${event.clientY - 50}px`;
 
-    document.body.appendChild(effect);
+        document.body.appendChild(effect);
 
-    setTimeout(() => {
-      document.body.removeChild(effect);
-    }, 600);
-  }
+        setTimeout(() => {
+            document.body.removeChild(effect);
+        }, 600);
+    }
 
     // Update the click counter display
-  updateClickCounter() {
-    this.clickCounterEl.textContent = this.clickCount;
-    this.clickCounterEl.style.transform = 'scale(1.2)';
+    updateClickCounter() {
+        this.clickCounterEl.textContent = this.clickCount;
+        this.clickCounterEl.style.transform = 'scale(1.2)';
 
-    setTimeout(() => {
-      this.clickCounterEl.style.transform = 'scale(1)';
-    }, 200);
-  }
-
-  sendToServer(data) {
-    if (this.isConnected && this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify(data));
-      console.log('Sent to server:', data);
-    } else {
-      console.log('WebSocket not connected, cannot send:', data);
+        setTimeout(() => {
+            this.clickCounterEl.style.transform = 'scale(1)';
+        }, 200);
     }
-  }
 
-  sendClickData(event) {
-    const data = {
-      type: 'click',
-    };
-    this.sendToServer(data);
-  }
-
-  updateStatus(status) {
-    this.statusEl.textContent = status;
-    this.statusEl.className = `status ${status.toLowerCase()}`;
-  }
-
-  updateTotalCounter(totalCount) {
-    if (!this.totalCounterEl) {
-      this.totalCounterEl = document.createElement('div');
-      this.totalCounterEl.id = 'totalCounter';
-      this.totalCounterEl.style.position = 'fixed';
-      this.totalCounterEl.style.top = '10px';
-      this.totalCounterEl.style.left = '10px';
-      this.totalCounterEl.style.backgroundColor = 'rgba(0,0,0,0.6)';
-      this.totalCounterEl.style.color = 'white';
-      this.totalCounterEl.style.padding = '5px 10px';
-      this.totalCounterEl.style.borderRadius = '6px';
-      this.totalCounterEl.style.fontSize = '16px';
-      this.totalCounterEl.style.zIndex = '1000';
-      document.body.appendChild(this.totalCounterEl);
+    sendToServer(data) {
+        if (this.isConnected && this.socket.readyState === WebSocket.OPEN) {
+            this.socket.send(JSON.stringify(data));
+            console.log('Sent to server:', data);
+        } else {
+            console.log('WebSocket not connected, cannot send:', data);
+        }
     }
-    this.totalCounterEl.textContent = `Total: ${totalCount}`;
-  }
+
+    sendClickData(event) {
+        const data = {
+            type: 'click'
+        };
+        this.sendToServer(data);
+    }
+
+    updateStatus(status) {
+        this.statusEl.textContent = status;
+        this.statusEl.className = `status ${status.toLowerCase()}`;
+    }
+
+    updateTotalCounter(totalCount) {
+        if (!this.totalCounterEl) {
+            this.totalCounterEl = document.createElement('div');
+            this.totalCounterEl.id = 'totalCounter';
+            this.totalCounterEl.style.position = 'fixed';
+            this.totalCounterEl.style.top = '10px';
+            this.totalCounterEl.style.left = '10px';
+            this.totalCounterEl.style.backgroundColor = 'rgba(0,0,0,0.6)';
+            this.totalCounterEl.style.color = 'white';
+            this.totalCounterEl.style.padding = '5px 10px';
+            this.totalCounterEl.style.borderRadius = '6px';
+            this.totalCounterEl.style.fontSize = '16px';
+            this.totalCounterEl.style.zIndex = '1000';
+            document.body.appendChild(this.totalCounterEl);
+        }
+        this.totalCounterEl.textContent = `Total: ${totalCount}`;
+    }
 }
 
 // Initialize the application when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-  new WebSocketClickCounter();
+    new WebSocketClickCounter();
 });

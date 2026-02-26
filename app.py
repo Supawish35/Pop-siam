@@ -2,7 +2,6 @@ import asyncio
 import json
 import os
 from aiohttp import web, WSMsgType
-from datetime import datetime
 from pathlib import Path
 
 TOTAL_FILE = Path("total.txt")
@@ -10,7 +9,6 @@ TOTAL_FILE = Path("total.txt")
 class AppState:
     def __init__(self):
         self.total_clicks = 0
-        self.client_clicks = {}  # addr -> int
         self.peers = set()  # set of WebSocketResponse
         self.lock = asyncio.Lock()
 
@@ -48,7 +46,6 @@ async def websocket_handler(request: web.Request):
     async with state.lock:
         first_client = len(state.peers) == 0
         state.peers.add(ws)
-        state.client_clicks.setdefault(addr, 0)
         if first_client:
             # reload total
             state.total_clicks = read_total_from_file()
@@ -72,12 +69,11 @@ async def websocket_handler(request: web.Request):
 
                     # reply to sender
                     await ws.send_json({
-                        "type": "click_response",
                         "total_clicks": total,
                     })
 
                     # broadcast to others
-                    bmsg = {"type": "global_update", "total_clicks": total}
+                    bmsg = {"total_clicks": total}
                     async with state.lock:
                         peers = list(state.peers)
                     for p in peers:
@@ -97,8 +93,6 @@ async def websocket_handler(request: web.Request):
         async with state.lock:
             if ws in state.peers:
                 state.peers.remove(ws)
-            if addr in state.client_clicks:
-                del state.client_clicks[addr]
             no_clients = len(state.peers) == 0
             if no_clients:
                 save_total_to_file(state.total_clicks)
