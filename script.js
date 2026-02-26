@@ -39,7 +39,7 @@ class WebSocketClickCounter {
   connectWebSocket() {
     // Dynamically construct WebSocket URL based on current location
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}`;
+    const wsUrl = `${protocol}//${window.location.host}/ws`;
     this.socket = new WebSocket(wsUrl);
 
     this.socket.onopen = () => {
