@@ -79,13 +79,6 @@ fn resolve_bind_addr() -> String {
         }
     }
 
-    if let Ok(addr) = env::var("ADDR") {
-        let addr = sanitize_env_value(addr);
-        if !addr.is_empty() {
-            return addr;
-        }
-    }
-
     let host = env::var("HOST")
         .map(sanitize_env_value)
         .unwrap_or_else(|_| "0.0.0.0".to_string());
