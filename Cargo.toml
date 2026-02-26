@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-dotenv = "0.15.0" # Use the latest version available on crates.io
+dotenv = "0.15.0"
 tokio = { version = "1", features = ["full"] }
 tungstenite = "0.23.0"
 futures-util = "0.3"

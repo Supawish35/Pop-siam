@@ -1,4 +1,27 @@
+# Rust
 /target/
-/total.txt
-/target/debug/
-/.env
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# Build files
+/build/
+dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env.local
+.env.*.local
+
+# OS
+Thumbs.db
+
+# Development
+*.log

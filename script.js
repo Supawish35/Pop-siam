@@ -1,6 +1,3 @@
-const IP = '74.220.48.0'; // Change to your server IP if needed
-const PORT = '8765'; // WebSocket server port 
-
 const GOAL = 1500; // Click goal to change the image
 
 class WebSocketClickCounter {
@@ -40,7 +37,9 @@ class WebSocketClickCounter {
   }
 
   connectWebSocket() {
-    const wsUrl = `ws://${IP}:${PORT}`;
+    // Dynamically construct WebSocket URL based on current location
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}`;
     this.socket = new WebSocket(wsUrl);
 
     this.socket.onopen = () => {

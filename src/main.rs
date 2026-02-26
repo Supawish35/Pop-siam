@@ -16,8 +16,6 @@ use std::env;
 
 use serde::{Deserialize, Serialize};
 use tokio::net::{TcpListener, TcpStream};
-
-
 use tokio_tungstenite::tungstenite;
 
 type Tx = UnboundedSender<tungstenite::protocol::Message>;
@@ -73,6 +71,14 @@ fn sanitize_env_value(value: String) -> String {
 }
 
 fn resolve_bind_addr() -> String {
+    // Render sets PORT environment variable
+    if let Ok(port) = env::var("PORT") {
+        let port = sanitize_env_value(port);
+        if !port.is_empty() {
+            return format!("0.0.0.0:{}", port);
+        }
+    }
+
     if let Ok(addr) = env::var("ADDR") {
         let addr = sanitize_env_value(addr);
         if !addr.is_empty() {
@@ -266,7 +272,7 @@ async fn main() -> Result<(), IoError> {
     let state = Arc::new(Mutex::new(AppState::new()));
     let peer_map = PeerMap::new(Mutex::new(HashMap::new()));
 
-    println!("Press Ctrl+C to shutdown the programs.");
+    println!("Press Ctrl+C to shutdown the server.");
     loop {
         tokio::select! {
             Ok((stream, addr)) = listener.accept() => {
