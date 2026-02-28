@@ -31,9 +31,17 @@ class WebSocketClickCounter {
             this.handleMouseDown(e);
         });
 
-        document.body.addEventListener('mouseup', (e) => {
-            this.handleMouseUp(e);
+        document.body.addEventListener('mouseup', () => {
+            this.handleMouseUp();
         });
+
+        document.body.addEventListener('touchstart', (e) =>{
+            this.handleTouchStart(e)
+        });
+
+        document.body.addEventListener('touchend', () => {
+            this.handleTouchEnd()
+        })
     }
 
     connectWebSocket() {
@@ -130,28 +138,51 @@ class WebSocketClickCounter {
         }
     }
 
-    //mouse down 
-    handleMouseDown(event) {
+    //? Change Photos depend on goal
+    changePhotoMouseDown(){
         if (this.clickCount < GOAL) {
             this.dynamicImageEl.src = this.clickedImageSrc;
         } else {
             this.dynamicImageEl.src = this.goalClickedImageSrc;
         }
-        this.audio.play();
-        this.createClickEffect(event);
-        this.clickCount += 1;
-        this.sendClickData(event);
     }
 
-    //mouse up
-    handleMouseUp(event) {
+    changePhotoMouseUp(){
         if (this.clickCount < GOAL) {
             this.dynamicImageEl.src = this.originalImageSrc;
         } else {
             this.dynamicImageEl.src = this.goalOriginalImageSrc;
         }
+    }
+
+    //mouse down 
+    handleMouseDown(event) {
+        this.changePhotoMouseDown();
+        this.audio.play();
+        this.clickCount += 1;
+        this.createClickEffect(event);
+        this.sendClickData(event);
+    }
+
+    //mouse up
+    handleMouseUp() {
+        this.changePhotoMouseUp();
         this.audio.pause();
         this.audio.currentTime = 0; // Reset audio to start
+    }
+
+    handleTouchStart(event){
+        this.changePhotoMouseDown();
+        this.audio.play();
+        this.clickCount += 1;
+        this.createClickEffect(event);
+        this.sendClickData(event);
+    }
+
+    handleTouchEnd(){
+        this.changePhotoMouseUp();
+        this.audio.pause();
+        this.audio.currentTime = 0;
     }
 
     // Create a click effect at the mouse position
