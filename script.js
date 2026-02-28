@@ -36,11 +36,15 @@ class WebSocketClickCounter {
         });
 
         document.body.addEventListener('touchstart', (e) =>{
-            this.handleTouchStart(e)
+            this.handleTouchStart(e);
         });
 
         document.body.addEventListener('touchend', () => {
-            this.handleTouchEnd()
+            this.handleTouchEnd();
+        })
+
+        document.body.addEventListener('touchcancel', () => {
+            this.handleTouchEnd();
         })
     }
 
