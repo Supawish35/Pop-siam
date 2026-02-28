@@ -171,12 +171,9 @@ class WebSocketClickCounter {
         this.audio.currentTime = 0; // Reset audio to start
     }
 
-    handleTouchStart(event){
+    handleTouchStart(){
         this.changePhotoMouseDown();
         this.audio.play();
-        this.clickCount += 1;
-        this.createClickEffect(event);
-        this.sendClickData(event);
     }
 
     handleTouchEnd(){
